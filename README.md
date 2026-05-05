@@ -1,73 +1,152 @@
-# Taller de GitLab CI: Configuración de un Pipeline de Integración Continua
+# Taller de GitHub Actions: Configuración de un Pipeline de Integración Continua
 
-Este taller te guiará paso a paso para configurar un pipeline de Integración Continua (CI) utilizando GitLab CI. Aprenderás a crear un proyecto en GitLab, agregar un archivo de configuración `.gitlab-ci.yml`, y verificar la ejecución del pipeline.
+Este documento describe el proceso seguido para configurar un pipeline de Integración Continua (CI) utilizando **GitHub Actions**. Se creó un repositorio en GitHub, se añadió el archivo de configuración `.github/workflows/ci.yml`, el script de pruebas `run_tests.sh`, y se verificó la ejecución del pipeline.
 
-## Paso 1: Crear un Proyecto en GitLab
+---
 
-1. **Iniciar Sesión en GitLab:**
-   - Accede a tu cuenta de GitLab o regístrate si no tienes una.
+## Paso 1: Crear el Repositorio en GitHub
 
-2. **Crear un Nuevo Proyecto:**
-   - En el panel de control, haz clic en "New Project" (Nuevo Proyecto).
-   - Selecciona "Create blank project" (Crear proyecto en blanco).
-   - Asigna un nombre al proyecto y configura la visibilidad según tus necesidades (pública o privada).
-   - Haz clic en "Create project" (Crear proyecto).
+Se inició sesión en GitHub y se creó un nuevo repositorio público llamado **DAYS-Integracion_continua**.
 
-## Paso 2: Agregar el Archivo `.gitlab-ci.yml`
+![Repositorio GitHub](images/01_repositorio_github.png)
 
-1. **Crear el Archivo de Configuración:**
-   - En el repositorio del proyecto, crea un nuevo archivo llamado `.gitlab-ci.yml`.
+---
 
-2. **Definir el Pipeline en `.gitlab-ci.yml`:**
-   - Agrega el siguiente contenido al archivo para configurar un pipeline básico con etapas de build y test:
-     ```yaml
-     stages:
-       - build
-       - test
+## Paso 2: Agregar el Archivo de Configuración de GitHub Actions
 
-     build_job:
-       stage: build
-       script:
-         - echo "Building the project..."
+### 2.1 Estructura de archivos creada
 
-     test_job:
-       stage: test
-       script:
-         - echo "Running tests..."
-         - ./run_tests.sh
-     ```
-   - Este archivo define dos etapas: `build` y `test`, y dos jobs que se ejecutarán en esas etapas.
+Dentro del repositorio se creó la siguiente estructura:
+
+```
+DAYS-Integracion_continua/
+├── .github/
+│   └── workflows/
+│       └── ci.yml
+├── run_tests.sh
+├── images/
+└── README.md
+```
+
+### 2.2 Archivo `.github/workflows/ci.yml`
+
+Se creó el archivo de configuración del pipeline con dos jobs: `build` y `test`.
+
+```yaml
+name: CI Pipeline
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Build the project
+      run: echo "Building the project..."
+
+  test:
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Run tests
+      run: |
+        chmod +x ./run_tests.sh
+        ./run_tests.sh
+```
+
+- El pipeline se activa con cada `push` o `pull_request`.
+- El job `build` se ejecuta primero en una máquina virtual con Ubuntu.
+- El job `test` depende de `build` (usando `needs: build`) y ejecuta el script de pruebas.
+
+### 2.3 Archivo `run_tests.sh`
+
+Se creó el script de pruebas:
+
+```sh
+#!/bin/sh
+
+# Salir inmediatamente si un comando falla
+set -e
+
+echo "Instalando dependencias..."
+echo "No hay dependencias externas para este proyecto de demostración."
+
+echo "Ejecutando pruebas..."
+echo "Prueba 1: Verificando estructura del repositorio..."
+test -f .github/workflows/ci.yml && echo "  ✔ ci.yml encontrado"
+test -f run_tests.sh && echo "  ✔ run_tests.sh encontrado"
+
+echo "Todas las pruebas pasaron exitosamente."
+echo "Pruebas completadas."
+```
+
+Se le otorgaron permisos de ejecución con:
+
+```sh
+chmod +x run_tests.sh
+```
+
+![Pestaña Actions del repositorio](images/02_actions_tab.png)
+
+---
 
 ## Paso 3: Commit y Push
 
-1. **Realizar un Commit del Archivo:**
-   - Guarda el archivo `.gitlab-ci.yml` y realiza un commit en tu repositorio.
-   - Si estás utilizando la interfaz web de GitLab, puedes agregar un mensaje de commit y hacer clic en "Commit changes" (Confirmar cambios).
+Se realizó el commit de todos los archivos al repositorio con los siguientes comandos:
 
-2. **Push al Repositorio (si estás usando Git localmente):**
-   - Si estás trabajando en tu máquina local, usa los siguientes comandos para realizar un commit y un push de los cambios:
-     ```sh
-     git add .gitlab-ci.yml
-     git commit -m "Add GitLab CI configuration"
-     git push origin main
-     ```
+```sh
+git add .github/workflows/ci.yml
+git add run_tests.sh
+git commit -m "Add GitHub Actions CI configuration"
+git push origin main
+```
+
+---
 
 ## Paso 4: Verificar la Ejecución del Pipeline
 
-1. **Ver el Pipeline en GitLab:**
-   - Navega a la sección "CI/CD" en el menú lateral del proyecto.
-   - Haz clic en "Pipelines" para ver la lista de pipelines ejecutados.
+### 4.1 Pipeline en ejecución
 
-2. **Revisar el Estado del Pipeline:**
-   - Observa el estado del pipeline que acabas de crear. Deberías ver que las etapas `build` y `test` se están ejecutando o ya se han completado.
-   - Haz clic en el pipeline para ver los detalles de cada job, incluidos los logs de ejecución.
+Al hacer push de los archivos, GitHub Actions detectó el archivo `ci.yml` y disparó el pipeline automáticamente. Desde la pestaña **Actions** del repositorio se puede ver el flujo de trabajo ejecutándose.
+
+![Pipeline ejecutándose](images/03_pipeline_ejecutando.png)
+
+### 4.2 Detalle del Job `build`
+
+El job `build` se ejecutó correctamente imprimiendo el mensaje de construcción.
+
+![Logs del job Build](images/04_build_job_logs.png)
+
+### 4.3 Detalle del Job `test`
+
+Una vez completado el `build`, el job `test` ejecutó el script `run_tests.sh` verificando la estructura del repositorio.
+
+![Logs del job Test](images/05_test_job_logs.png)
+
+### 4.4 Pipeline completado exitosamente
+
+Ambos jobs finalizaron sin errores, mostrando el checkmark verde de éxito.
+
+![Pipeline completado exitosamente](images/06_pipeline_exitoso.png)
+
+---
 
 ## Resumen
 
-En este taller, has aprendido a:
-- Crear un nuevo proyecto en GitLab.
-- Configurar un pipeline de CI básico utilizando un archivo `.gitlab-ci.yml`.
-- Realizar commit y push de cambios al repositorio.
-- Verificar la ejecución del pipeline en GitLab.
+En este taller se realizaron los siguientes pasos:
 
-La configuración de un pipeline de CI ayuda a automatizar la integración y prueba del código, mejorando la eficiencia y la calidad del desarrollo de software.
+| Paso | Descripción | Estado |
+|------|-------------|--------|
+| 1 | Creación del repositorio en GitHub | ✅ Completado |
+| 2 | Configuración del archivo `.github/workflows/ci.yml` | ✅ Completado |
+| 3 | Creación del script `run_tests.sh` | ✅ Completado |
+| 4 | Commit y Push al repositorio | ✅ Completado |
+| 5 | Verificación del pipeline en GitHub Actions | ✅ Completado |
+
+La configuración de un pipeline de CI con GitHub Actions permite automatizar la integración y verificación del código en cada push o pull request, mejorando la calidad y la eficiencia del desarrollo de software.

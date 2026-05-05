@@ -1,0 +1,25 @@
+name: CI Pipeline
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Build the project
+      run: echo "Building the project..."
+
+  test:
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Run tests
+      run: |
+        chmod +x ./run_tests.sh
+        ./run_tests.sh

@@ -1,5 +1,7 @@
 # Taller de GitHub Actions: Configuración de un Pipeline de Integración Continua
 
+**Autores:** Manuel Castillo · Daniel Riveros
+
 Este documento describe el proceso seguido para configurar un pipeline de Integración Continua (CI) utilizando **GitHub Actions**. Se creó un repositorio en GitHub, se añadió el archivo de configuración `.github/workflows/ci.yml`, el script de pruebas `run_tests.sh`, y se verificó la ejecución del pipeline.
 
 ---
@@ -125,15 +127,9 @@ El job `build` se ejecutó correctamente imprimiendo el mensaje de construcción
 
 ### 4.3 Detalle del Job `test`
 
-Una vez completado el `build`, el job `test` ejecutó el script `run_tests.sh` verificando la estructura del repositorio.
+Una vez completado el `build`, el job `test` ejecutó el script `run_tests.sh` verificando la estructura del repositorio. Ambos jobs finalizaron sin errores, mostrando el checkmark verde de éxito.
 
 ![Logs del job Test](images/05_test_job_logs.png)
-
-### 4.4 Pipeline completado exitosamente
-
-Ambos jobs finalizaron sin errores, mostrando el checkmark verde de éxito.
-
-![Pipeline completado exitosamente](images/06_pipeline_exitoso.png)
 
 ---
 
